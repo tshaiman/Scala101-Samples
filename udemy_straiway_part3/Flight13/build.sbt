@@ -1,15 +1,13 @@
+
 name := "Flight13"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.5"
+lazy val akkaVersion = "2.5.9"
 
-scalacOptions += "-deprecation"
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0-M16-SNAP1" % "test"
-
-libraryDependencies += "org.scala-lang" % "scala-actors" % "2.11.7"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.0"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.4.0"
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-remote" % akkaVersion,
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+)

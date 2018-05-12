@@ -18,14 +18,16 @@ import akka.util.Timeout
 import org.scalatest.FunSpec
 import koans.support.BlankValues._
 import koans.support.StopOnFirstFailure
+
 import scala.collection._
 import org.scalatest.SeveredStackTraces
 import akka.pattern.ask
 import akka.util.Timeout
 import org.scalatest.Matchers
 import akka.actor._
+
 import scala.concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 
 // First we are going to create a Logger actor that takes a String message
 // and adds it to a running list of log messages - starting out easy
@@ -42,6 +44,9 @@ class Logger extends Actor {
   // and returning a list of messages on a ListMessage request
   def receive = {
     // put the implementation here and replace the line below
+    case str:String =>  log = str :: log
+    case Reset => log = List.empty[String]
+    case ListMessages => sender() ! log
     case _ =>
   }
 }
@@ -50,7 +55,7 @@ class Logger extends Actor {
 class LoggerSpec extends FunSpec with Matchers with StopOnFirstFailure with SeveredStackTraces {
   describe("Logger") {
     val system = ActorSystem("Flight13Logger")
-    val logger = system.actorOf(Props[Logger], name = "logger")
+    val logger:ActorRef = system.actorOf(Props[Logger], name = "logger")
     implicit val timeout = Timeout(5 seconds)
 
     it("should log messages passed in as Strings") {
@@ -62,7 +67,7 @@ class LoggerSpec extends FunSpec with Matchers with StopOnFirstFailure with Seve
     // Fill in the method below to send a request to logger to get the
     // current messages and return them as a list of Strings, replacing the Nil
     // place holder here
-    def getCurrentResults(): List[String] = Nil
+    def getCurrentResults(): List[String] = Await.result((logger ? ListMessages).mapTo[List[String]],200.microsecond)
 
     it("should contain the messages logged so far") {
       val results = getCurrentResults()
@@ -83,7 +88,7 @@ class LoggerSpec extends FunSpec with Matchers with StopOnFirstFailure with Seve
     }
 
     it("should exit gracefully") {
-      system.shutdown()
+
     }
   }
 }
@@ -112,8 +117,37 @@ class Trader(val item: String, q: Int, logger: ActorRef) extends Actor {
   // you need to define the receive method here to handle the buys and sells, and other stuff
   def receive = {
     // fill in the receive method here.
+    case trade @ Sell(q:Int) => {
+      quant += q
+      log(trade)
+    }
+    case trade @ Buy(requested:Int) => {
+      if(quant >= requested) {
+        quant-= requested
+        log(trade)
+      } else
+        logger !s"Insufficient $item to sell"
+
+    }
+    case Quantity => sender() ! quant
     case _ =>
   }
+}
+
+object Beans {
+  def props(q:Int,logger:ActorRef): Props = Props(new Beans(q,logger))
+}
+
+class Beans(q:Int,logger:ActorRef) extends Trader("Beans",q,logger) {
+
+}
+
+object PorkBellies {
+  def props(q:Int,logger:ActorRef): Props = Props(new PorkBellies(q,logger))
+}
+
+class PorkBellies(q:Int,logger:ActorRef) extends Trader("Pork Bellies",q,logger) {
+
 }
 
 
@@ -127,11 +161,19 @@ class Trader(val item: String, q: Int, logger: ActorRef) extends Actor {
 // You should also establish a 5 second timeout implicit for operations
 // in order to get all this to compile.
 
-/*class TraderSpec extends FunSpec with Matchers with StopOnFirstFailure with SeveredStackTraces {
+class TraderSpec extends FunSpec with Matchers with StopOnFirstFailure with SeveredStackTraces {
   describe("Trader") {
 
     // establish the actor system, logger, Beans and PorkBellies traders here,
     // also the timeout
+    val system = ActorSystem("Flight13Trader")
+    val logger:ActorRef = system.actorOf(Props[Logger], name = "logger")
+    val beanTrader:ActorRef = system.actorOf(Beans.props(100, logger), "beanTrader")
+    val porkBelliesTrader:ActorRef = system.actorOf(PorkBellies.props(100, logger), "porkBelliesTrader")
+
+    implicit val timeout = Timeout(5 seconds)
+
+
 
     def getCurrentMessages(): List[String] =
       Await.result(logger ? ListMessages, timeout.duration) match {
@@ -188,7 +230,7 @@ class Trader(val item: String, q: Int, logger: ActorRef) extends Actor {
     }
 
     it("should shut down properly") {
-      system.shutdown()
+        // system.shutdown()
     }
   }
-}*/
+}

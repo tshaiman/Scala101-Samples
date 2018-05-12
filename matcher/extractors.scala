@@ -57,8 +57,8 @@ object Names {
 }
 
 def greet(fullName: String) = fullName match {
-  case Names(lastName, firstName, middle) =>
-    s"Good morning, $firstName $lastName! " 
+  case Names(lastName, firstName, rest @ _*) =>
+    s"Good morning, $firstName $lastName! . middle length is " +   rest.length
   case _ =>
     "Welcome! Please make sure to fill in your name!"
 }
