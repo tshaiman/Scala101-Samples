@@ -34,7 +34,7 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   val listOfSeqs = List(seq1, seq2, seq3, seq4)
 
   // can you find an easy way to convert a String to a list of Chars?
-  def stringToChars(s1: String): List[Char] = Nil
+  def stringToChars(s1: String): List[Char] = s1.toList
 
   test("Convert a string to a list of chars") {
     stringToChars(seq1) should be (List('G','T','A','A','G','C','T','T','A','C'))
@@ -42,7 +42,7 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
 
   // Using the above knowledge, create a method that instead of just giving back individual chars in a list,
   // map the list of chars to a list of Sets of chars, each set having a single char in it (for now)
-  def stringToSetOfChars(s1: String): List[Set[Char]] = Nil
+  def stringToSetOfChars(s1: String): List[Set[Char]] = stringToChars(s1).map(x=>Set(x))
 
   test("Convert a string to a list of set of chars (each set with one char in it)") {
     stringToSetOfChars(seq1).toString should be ("List(Set(G), Set(T), Set(A), Set(A), Set(G), Set(C), Set(T), Set(T), Set(A), Set(C))")
@@ -52,7 +52,7 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // is already there, it doesn't add a new version, use zip to create a list of tuples out of a list of set of chars
   // (like that given above) and a list of chars from the string, and add those chars to the set so that all
   // variations are captured, but no duplicates.
-  def combineZippedSetsAndString(s1: List[Set[Char]], seq: String): List[Set[Char]] = Nil
+  def combineZippedSetsAndString(s1: List[Set[Char]], seq: String): List[Set[Char]] = (s1 zip seq).map(tp=>tp._1 + tp._2)
 
   test("Combine list of sets with list of new chars") {
     val startSet = stringToSetOfChars(seq1)
@@ -65,7 +65,11 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // every possible letter at that position, combining the stringToSetOfChars method for the head of the list
   // and the combineZippedSetsAndChars for the remaining elements of the list in turn. You can do this using the
   // foldLeft method demonstrated in the slides.
-  def comboSetsForSequences(sequences: List[String]): List[Set[Char]] = Nil
+  def comboSetsForSequences(sequences: List[String]): List[Set[Char]] = {
+    val head :: rest = sequences
+    val startSet = stringToSetOfChars(head)
+    rest.foldLeft(startSet)(combineZippedSetsAndString(_,_))
+  }
 
   test("Find all combinations from sequences") {
     val allCombos = comboSetsForSequences(listOfSeqs)
@@ -80,7 +84,11 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // of Ints, and partitions the rest of the list into two new lists, one with values lower than the first number,
   // and one with the rest. It should return three values, the first number, the list lower, and the remaining list
   // to satisfy the test below
-  def partitionByFirst(numbers: List[Int]): (Int, List[Int], List[Int]) = (0, Nil, Nil)
+  def partitionByFirst(numbers: List[Int]): (Int, List[Int], List[Int]) = {
+    val head :: rest = numbers
+    val (lower,remaining) = rest.partition(_ <  head)
+    (head,lower,remaining)
+  }
 
   test("Partition by first") {
     val (head, lower, remaining) = partitionByFirst(numbers)
@@ -96,7 +104,13 @@ class Flight14 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // return the result of mysteryFunction(lower) ::: List(head) ::: mysteryFunction(remaining)
   // What have you just created? Check that it works in the test below
 
-  def mysteryFunction(numbers: List[Int]): List[Int] = Nil
+  def mysteryFunction(numbers: List[Int]): List[Int] =  numbers match{
+    case Nil => Nil
+    case l:List[Int] => {
+        val (head,lower,remaining) = partitionByFirst(l)
+        mysteryFunction(lower) ::: List(head) ::: mysteryFunction(remaining)
+    }
+  }
 
   test("Can you tell what it is yet") {
     val newList = mysteryFunction(numbers)

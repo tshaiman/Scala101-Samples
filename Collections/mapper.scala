@@ -6,3 +6,9 @@ val l2 = List("amenity","cuisine" , "non","name","Name","nooo")
 l flatMap (record get _)
 l2 flatMap (record2 get _)
 
+var m1 = Map(1->1,2->2,3->3,4->4,5->5)
+m1 += (6->6)
+
+
+
+
