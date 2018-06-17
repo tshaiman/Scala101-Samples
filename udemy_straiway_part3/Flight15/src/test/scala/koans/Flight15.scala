@@ -38,10 +38,12 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // become a list of tuples of the set with an index number for each position.
   // You can do this inline in the test or write your own function, your call...
 
+  def ComboSetForSeqWithIndex(sequances:List[String]):List[(Set[Char],Int)] = {
+    comboSetsForSequences(listOfSeqs).zipWithIndex
+  }
   test("Combo list zipped with index") {
     // this is the part you have to fill in...
-    val comboListWithIndex = __
-    
+    val comboListWithIndex = ComboSetForSeqWithIndex(listOfSeqs)
     comboListWithIndex.toString should be ("List((Set(G, C),0), (Set(T, A, -),1), (Set(A, C),2), (Set(A),3), (Set(G, C),4), (Set(C),5), (Set(T),6), (Set(T, -, A),7), (Set(A),8), (Set(C),9))")
   }
 
@@ -53,7 +55,7 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
     // make the filteredListWithIndex hold the filtered list, with the indices - either as an inline
     // solution, or as a function, your choice. At the same time as you are filtering, reverse the order
     // so that the index is first, and the set is second
-    val filteredListWithIndex = __
+    val filteredListWithIndex = comboSetsForSequences(listOfSeqs).zipWithIndex.filter(x=> x._1.size > 1).map(x=>(x._2,x._1))
 
     filteredListWithIndex.toString should be ("List((0,Set(G, C)), (1,Set(T, A, -)), (2,Set(A, C)), (4,Set(G, C)), (7,Set(T, -, A)))")
   }
@@ -66,10 +68,12 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // If you have trouble, try some combinations in the REPL to see if you can get it to work - try with
   // simpler types to begin with (say Int -> String)
 
+
   test("Get a mutation map from a list of sequences") {
  
     // need to change this so that instead of an empty map, you get the mutation map in it
-    val mutationMap = Map[Int, Set[Char]]()
+    val filteredListWithIndex = comboSetsForSequences(listOfSeqs).zipWithIndex.filter(x=> x._1.size > 1).map(x=>(x._2,x._1))
+    val mutationMap = Map.empty ++ filteredListWithIndex
 
     mutationMap should be (Map(0 -> Set('G', 'C'), 1 -> Set('T', 'A', '-'), 2 -> Set('A', 'C'), 4 -> Set('G', 'C'), 7 -> Set('T', '-', 'A')))
   }
@@ -85,7 +89,7 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
     val t = (1,3,5,"seven")  // a tuple
 
     // convert it below
-    val tAsList = __
+    val tAsList = t.productIterator.toList
 
     tAsList should be (List(1,3,5,"seven"))
 
@@ -93,7 +97,7 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
     val a = Array(3,5,'7',"nine")
 
     // convert it below
-    val aAsList = __
+    val aAsList = a.toList
 
     aAsList should be (List(3,5,'7',"nine"))
 
@@ -102,6 +106,9 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
 
     // tricky one - convert s to a list and then write a test for it - does it work? If not, why not, and
     // can you find a safe way to make it work?
+    val sList = s.toList.sorted
+
+    sList should be (List(2,3,5,7,11))
   }
 
   // extra credit
