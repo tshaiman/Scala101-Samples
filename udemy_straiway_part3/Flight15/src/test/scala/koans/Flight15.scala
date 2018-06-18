@@ -7,6 +7,7 @@ import org.scalatest.Matchers
 import org.scalatest.SeveredStackTraces
 import support.BlankValues._
 import support.StopOnFirstFailure
+import scala.collection.immutable.TreeMap
 
 class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with SeveredStackTraces {
 
@@ -131,4 +132,24 @@ class Flight15 extends FunSuite with Matchers with StopOnFirstFailure with Sever
   // 4. Try experimenting with different types of Maps. Perhaps you can create a mutation map from the DNA
   // examples, but then find a way to convert it into a TreeMap so that the results are sorted. You can test
   // the sort order by comparing the treemap.toString to a string you specify
+
+  test("ExtraCredit Ex 1 TuppleToMap Sorted") {
+    val origin = Map(5->"5",4->"4",3->"3",1->"1",2->"2")
+    val converted = origin.toList.sortBy(_._1)
+
+    converted should be (List((1,"1"),(2,"2"),(3,"3"),(4,"4"),(5,"5")))
+
+    val origin2 = Map(5->"1",4->"2",3->"3",1->"5",2->"4")
+    val convert2 = origin2.toList.sortBy(_._2)
+    convert2 should be (List((5,"1"),(4,"2"),(3,"3"),(2,"4"),(1,"5")))
+
+  }
+
+  test("ExtraCredit Ex 4") {
+    val allCombos = comboSetsForSequences(listOfSeqs).zipWithIndex.map(x=>(10- x._2,x._1))
+
+    val sorted = TreeMap.empty[Int,Set[Char]] ++ allCombos
+    //sorted should be (Map(0 -> Set('G', 'C'), 1 -> Set('T', 'A', '-'), 2 -> Set('A', 'C'), 3 -> Set('A'), 4 -> Set('G', 'C'), 5 -> Set('C'), 6 -> Set('T'), 7 -> Set('T', '-', 'A'), 8 -> Set('A'), 9 -> Set('C')))
+    sorted.toString should be ("Map(1 -> Set(C), 2 -> Set(A), 3 -> Set(T, -, A), 4 -> Set(T), 5 -> Set(C), 6 -> Set(G, C), 7 -> Set(A), 8 -> Set(A, C), 9 -> Set(T, A, -), 10 -> Set(G, C))")
+  }
 }
