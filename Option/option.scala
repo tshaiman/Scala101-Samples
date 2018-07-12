@@ -24,33 +24,37 @@ object UserRepository {
   def findAll = users.values
 }
 
+println("foreach demo")
 //foreah works on Option !
 UserRepository.findById(3).foreach(user => println(user.firstName))
+val firstName3 = UserRepository.findById(3).map(_.firstName)
 val age = UserRepository.findById(2).map(_.age) 
 
 //bad
+println("map vrs flatMap")
 val gender = UserRepository.findById(2).map(_.gender) 
 //good
 val gender1 = UserRepository.findById(1).flatMap(_.gender) 
 val gender2 = UserRepository.findById(2).flatMap(_.gender) 
 val gender3 = UserRepository.findById(3).flatMap(_.gender) 
 
+println("user ToUpperCase")
 ///Exercise : Perform to Upper 
 val names: List[Option[String]] = List(Some("Johanna"), None, Some("Daniel"))
 
-val uppers = names.flatMap(_.map(_.toUpperCase))
+val uppers = names.flatMap(_.map(_.toUpperCase)) // or names.flatten.map(_.toUpperCase)
 
-
+println("For Comprehension")
 ///For Comprehension
 for {
-	user <- UserRepository.findById(2)
+	user <- UserRepository.findById(1)
 	gender <- user.gender 
-}yield gender
+} yield gender
 
 val gen = for {
 	user <- UserRepository.findAll
 	gender <- user.gender 
-}yield gender
+} yield gender
 
 
 
